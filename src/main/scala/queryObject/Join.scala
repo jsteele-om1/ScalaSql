@@ -1,10 +1,10 @@
 package queryObject
 
-import dbObject.{Column, Table}
+import dbObject.{Column, DbTable}
 
 trait Join extends QueryObject {
   def syntax: String
-  def rightTable: Table
+  def rightTable: DbTable
   def leftColumn: Column
   def rightColumn: Column
 
@@ -13,7 +13,7 @@ trait Join extends QueryObject {
   }
 }
 
-case class InnerJoin(leftColumn: Column, rightTable: Table, rightColumn: Column) extends Join {
+case class InnerJoin(leftColumn: Column, rightTable: DbTable, rightColumn: Column) extends Join {
   override def syntax: String = "INNER"
 }
 

@@ -1,6 +1,6 @@
 package queryObject
 
-import dbObject.Table
+import dbObject.{DbTable, Table}
 
 case class From(maybeTable: Option[Table]) {
   val table = maybeTable match {
@@ -13,7 +13,7 @@ case class From(maybeTable: Option[Table]) {
 
 object From {
   implicit def something(companion: From.type): From = companion.apply // can I get this to work???
-  def apply(table: Table): From = From(table)
+  def apply(table: DbTable): From = From(table)
   def apply: From = From(None)
 //  def apply()
 }

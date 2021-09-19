@@ -1,28 +1,40 @@
 package query
 
-import dbObject.{Column, Database, Field, Table, Transformation}
+import dbObject.{Column, Database, DbTable, Field, SqlObject, Table, Transformation}
 import queryObject.{Expressions, From, Join, Select, Where}
 
 class Query(columns: Seq[Field],
             table: Table,
             joins: Seq[Join],
-            where: Where) {
+            where: Where) extends Table {
+
+  override def isEmpty: Boolean = this.write == Query.builder.build.write
+
+  private def unpackTable(table: Table) = {
+    table match {
+      case dbTable: DbTable => dbTable
+      case query: Query => s"(${query.write})"
+    }
+  }
 
   private def isValid = table.isEmpty && columns.nonEmpty
 
   private val validColumns = if (isValid) columns else Seq.empty
-  private val validTable = if (isValid) table else Table("", "", "") // there's a better way to do this since it's part of the check
+  private val validTable = if (isValid) table else DbTable("", "", "") // there's a better way to do this since it's part of the check
 
   private val select = Select(validColumns)
-  private val from = From(validTable)
+  private val from = From(Some(validTable))
 
-  override def toString: String =
+  def write: String =
     s"""
        |$select
        |$from
        |${joins.mkString("\n")}
        |$where
        |""".stripMargin
+
+  override def toString: String = this.write
+  override def name: SqlObject = sqlObject(this.toString)
 }
 
 object Query {
@@ -30,13 +42,13 @@ object Query {
 }
 
 case class QueryBuilder(columns: Seq[Field],
-                        maybeTable: Option[Table],
+                        maybeTable: Option[DbTable],
                         joins: Seq[Join],
                         where: Where) { // todo change overall where to seq of filters
 
   val table = maybeTable match {
-    case None => Table("", "", "")
-    case Some(table: Table) => table
+    case None => DbTable("", "", "")
+    case Some(table: DbTable) => table
     case _ => throw new Exception("UH OH")
   }
 
@@ -44,7 +56,7 @@ case class QueryBuilder(columns: Seq[Field],
 
   def withSelectColumns(newColumns: Seq[Field]): QueryBuilder = this.copy(columns ++ newColumns)
 
-  def withFrom(table: Table): QueryBuilder = this.copy(maybeTable = Some(table))
+  def withFrom(table: DbTable): QueryBuilder = this.copy(maybeTable = Some(table))
 
   def withJoin(newJoin: Join): QueryBuilder = this.copy(joins = joins ++ Seq(newJoin))
 
@@ -65,7 +77,7 @@ object QueryBuilder {
     )
   }
 
-  def apply(column: Field, table: Table): QueryBuilder =
+  def apply(column: Field, table: DbTable): QueryBuilder =
     QueryBuilder(
       columns = Seq(column),
       maybeTable = Some(table),
@@ -73,7 +85,7 @@ object QueryBuilder {
       where = Where(Expressions.empty)
     )
 
-  def apply(columns: Seq[Field], table: Table): QueryBuilder =
+  def apply(columns: Seq[Field], table: DbTable): QueryBuilder =
     QueryBuilder(
       columns = columns,
       maybeTable = Some(table),
@@ -81,7 +93,7 @@ object QueryBuilder {
       where = Where(Expressions.empty)
     )
 
-  def apply(column: Field, table: Table, join: Join): QueryBuilder =
+  def apply(column: Field, table: DbTable, join: Join): QueryBuilder =
     QueryBuilder(
       columns = Seq(column),
       maybeTable = Some(table),
@@ -89,7 +101,7 @@ object QueryBuilder {
       where = Where(Expressions.empty)
     )
 
-  def apply(columns: Seq[Field], table: Table, join: Join): QueryBuilder =
+  def apply(columns: Seq[Field], table: DbTable, join: Join): QueryBuilder =
     QueryBuilder(
       columns = columns,
       maybeTable = Some(table),
@@ -97,7 +109,7 @@ object QueryBuilder {
       where = Where(Expressions.empty)
     )
 
-  def apply(column: Field, table: Table, joins: Seq[Join]): QueryBuilder =
+  def apply(column: Field, table: DbTable, joins: Seq[Join]): QueryBuilder =
     QueryBuilder(
       columns = Seq(column),
       maybeTable = Some(table),
@@ -105,7 +117,7 @@ object QueryBuilder {
       where = Where(Expressions.empty)
     )
 
-  def apply(columns: Seq[Field], table: Table, joins: Seq[Join]): QueryBuilder =
+  def apply(columns: Seq[Field], table: DbTable, joins: Seq[Join]): QueryBuilder =
     QueryBuilder(
       columns = columns,
       maybeTable = Some(table),

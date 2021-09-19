@@ -1,4 +1,4 @@
-import dbObject.{Coalesce, Column, Database, Schema, SqlObject, Table}
+import dbObject.{Coalesce, Column, Database, Schema, SqlObject, DbTable}
 import query.{Query, QueryBuilder}
 import queryObject.{From, InnerJoin, Select}
 
@@ -6,8 +6,8 @@ object Runner extends App {
 
   val database = Database("deiddev")
   val schema = Schema(database, "profile_store")
-  val patientTable = Table(schema, "patient")
-  val encounterTable = Table(schema, "encounter")
+  val patientTable = DbTable(schema, "patient")
+  val encounterTable = DbTable(schema, "encounter")
 
   val patientId = Column(patientTable, "patient_id")
   val encounterId = Column(encounterTable, "encounter_id")
@@ -33,12 +33,12 @@ object Runner extends App {
 //    .withJoin(InnerJoin(patientId, encounterTable, encounterPatientId))
 //    .build
 
-  val sql = Query.builder
+  val query = Query.builder
     .withSelectColumn(patientId)
     .withFrom(patientTable)
     .build
 
-  println(sql)
+  println(query.write)
 //
 //  val t = Seq(
 //    Seq("a"),

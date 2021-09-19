@@ -37,20 +37,27 @@ object Schema {
   def apply(database: Database, schemaName: String): Schema = Schema(database, schemaName)
 }
 
-case class Table(schema: Schema, tableName: String) extends Entity {
+trait Table extends Entity {
+  def write: String
+  def isEmpty: Boolean
+}
+
+case class DbTable(schema: Schema, tableName: String) extends Table {
   override def name: SqlObject = sqlObject(tableName)
 
   override def toString: String = s"${schema.toString}.$name"
 
-  def isEmpty: Boolean = this == Table("", "", "")
+  override def write: String = this.toString
+
+  def isEmpty: Boolean = this == DbTable("", "", "")
 }
 
-object Table {
+object DbTable {
   //  def apply(tableName: String): Table = new Table(Schema, tableName)
   //  def apply(schemaName: String, tableName: String): Table = Table(Schema(Database, schemaName), tableName)
-  def apply(databaseName: String, schemaName: String, tableName: String): Table = {
+  def apply(databaseName: String, schemaName: String, tableName: String): DbTable = {
     val database = Database(databaseName)
     val schema = Schema(database, schemaName)
-    Table(schema, tableName)
+    DbTable(schema, tableName)
   }
 }

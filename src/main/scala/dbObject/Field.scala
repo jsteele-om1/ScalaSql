@@ -4,7 +4,7 @@ trait Field {
   def relevantTables: Seq[Field]
 }
 
-case class Column(table: Table, columnName: String) extends Field with Entity {
+case class Column(table: DbTable, columnName: String) extends Field with Entity {
   override def name: SqlObject = sqlObject(columnName)
   override def toString: String = this match {
     case Column(table, column) => s"${table.name}.$column"
