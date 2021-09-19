@@ -1,0 +1,2 @@
+# ScalaSql
+Sql Builder Pattern
