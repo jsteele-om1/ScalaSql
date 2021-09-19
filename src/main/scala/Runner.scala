@@ -1,20 +1,21 @@
 import dbObject.{Coalesce, Column, Database, Schema, SqlObject, Table}
-import query.QueryBuilder
+import query.{Query, QueryBuilder}
 import queryObject.{From, InnerJoin, Select}
 
 object Runner extends App {
 
-  val database = Database(SqlObject("deiddev"))
-  val schema = Schema(database, SqlObject("profile_store"))
-  val patientTable = Table(schema, SqlObject("patient"))
-  val encounterTable = Table(schema, SqlObject("encounter"))
+  val database = Database("deiddev")
+  val schema = Schema(database, "profile_store")
+  val patientTable = Table(schema, "patient")
+  val encounterTable = Table(schema, "encounter")
 
-  val patientId = Column(patientTable, SqlObject("patient_id"))
-  val encounterId = Column(encounterTable, SqlObject("encounter_id"))
-  val encounterPatientId = Column(encounterTable, SqlObject("patient_id"))
+  val patientId = Column(patientTable, "patient_id")
+  val encounterId = Column(encounterTable, "encounter_id")
+  val encounterPatientId = Column(encounterTable, "patient_id")
 
   val coalescePatientId = Coalesce(Seq(patientId, encounterPatientId))
   val selectColumns = Seq(coalescePatientId, encounterId)
+
 
 //  val select = Select(selectColumns)
 //  val from = From(patientTable)
@@ -27,20 +28,25 @@ object Runner extends App {
 //      |$join
 //      |""".stripMargin
 
-  val sql = QueryBuilder(patientId, patientTable)
-    .withSelectColumn(encounterPatientId)
-    .withJoin(InnerJoin(patientId, encounterTable, encounterPatientId))
+//  val sql = QueryBuilder(patientId, patientTable)
+//    .withSelectColumn(encounterPatientId)
+//    .withJoin(InnerJoin(patientId, encounterTable, encounterPatientId))
+//    .build
+
+  val sql = Query.builder
+    .withSelectColumn(patientId)
+    .withFrom(patientTable)
     .build
 
   println(sql)
-
-  val t = Seq(
-    Seq("a"),
-    Seq("b")
-  )
-
-  val z = t.flatMap(i => i)
-  println(z)
+//
+//  val t = Seq(
+//    Seq("a"),
+//    Seq("b")
+//  )
+//
+//  val z = t.flatMap(i => i)
+//  println(z)
 
 
 

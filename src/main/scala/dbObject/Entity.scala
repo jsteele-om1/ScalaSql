@@ -41,6 +41,8 @@ case class Table(schema: Schema, tableName: String) extends Entity {
   override def name: SqlObject = sqlObject(tableName)
 
   override def toString: String = s"${schema.toString}.$name"
+
+  def isEmpty: Boolean = this == Table("", "", "")
 }
 
 object Table {
