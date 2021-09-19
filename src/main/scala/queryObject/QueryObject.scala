@@ -1,0 +1,3 @@
+package queryObject
+
+trait QueryObject
