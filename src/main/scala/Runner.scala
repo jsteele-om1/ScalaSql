@@ -17,21 +17,21 @@ object Runner extends App {
   val selectColumns = Seq(coalescePatientId, encounterId)
 
 
-//  val select = Select(selectColumns)
-//  val from = From(patientTable)
-//  val join = InnerJoin(patientId, encounterTable, patientId)
-//
-//  val sql =
-//    s"""
-//      |$select
-//      |$from
-//      |$join
-//      |""".stripMargin
+  //  val select = Select(selectColumns)
+  //  val from = From(patientTable)
+  //  val join = InnerJoin(patientId, encounterTable, patientId)
+  //
+  //  val sql =
+  //    s"""
+  //      |$select
+  //      |$from
+  //      |$join
+  //      |""".stripMargin
 
-//  val sql = QueryBuilder(patientId, patientTable)
-//    .withSelectColumn(encounterPatientId)
-//    .withJoin(InnerJoin(patientId, encounterTable, encounterPatientId))
-//    .build
+  //  val sql = QueryBuilder(patientId, patientTable)
+  //    .withSelectColumn(encounterPatientId)
+  //    .withJoin(InnerJoin(patientId, encounterTable, encounterPatientId))
+  //    .build
 
   val query = Query.builder
     .withSelectColumn(patientId)
@@ -39,15 +39,14 @@ object Runner extends App {
     .build
 
   println(query.write)
-//
-//  val t = Seq(
-//    Seq("a"),
-//    Seq("b")
-//  )
-//
-//  val z = t.flatMap(i => i)
-//  println(z)
-
+  //
+  //  val t = Seq(
+  //    Seq("a"),
+  //    Seq("b")
+  //  )
+  //
+  //  val z = t.flatMap(i => i)
+  //  println(z)
 
 
 }

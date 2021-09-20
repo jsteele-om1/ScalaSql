@@ -3,7 +3,7 @@ package dbObject
 trait Entity {
   def sqlObject(entity: String): SqlObject = SqlObject(entity)
 
-  def name: SqlObject
+  def name: SqlObject // could condense this to one method
 }
 
 case class SqlObject(objectName: String) {
@@ -39,6 +39,7 @@ object Schema {
 
 trait Table extends Entity {
   def write: String
+
   def isEmpty: Boolean
 }
 

@@ -34,11 +34,12 @@ class Query(columns: Seq[Field],
        |""".stripMargin
 
   override def toString: String = this.write
+
   override def name: SqlObject = sqlObject(this.toString)
 }
 
 object Query {
-  def builder: QueryBuilder = QueryBuilder.apply
+  def builder: QueryBuilder = QueryBuilder.apply // why do I need to call apply here?
 }
 
 case class QueryBuilder(columns: Seq[Field],

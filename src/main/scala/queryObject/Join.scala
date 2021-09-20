@@ -2,10 +2,13 @@ package queryObject
 
 import dbObject.{Column, DbTable}
 
-trait Join extends QueryObject {
+trait Join extends QueryObject { // should this be a class or a trait?? or should inner outer etc... be functions??
   def syntax: String
+
   def rightTable: DbTable
+
   def leftColumn: Column
+
   def rightColumn: Column
 
   override def toString: String = {
