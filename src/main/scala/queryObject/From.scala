@@ -1,23 +1,16 @@
 package queryObject
 
-import dbObject.{DbTable, Table}
+import dbObject.{DbTable, EmptyTable, Table}
+import query.Query
 
-case class From(maybeTable: Option[Table]) {
-  val table = maybeTable match {
-    case Some(table) => table
-    case None => "" // ultimately would want this to be an empty table once I can implement that method
+import scala.collection.View.Empty
+
+case class From(table: Table) {
+
+  override def toString: String = table match {
+    case t: DbTable => s"FROM ${t.toString}"
+    case t: Query => s"FROM (${t.toString})"
+    case _ => throw new IllegalArgumentException(s"$_ cannot be passed into a from clause")
   }
-
-  override def toString: String = s"FROM ${table.toString}"
-
-  def empty = this.copy(maybeTable = None)
-}
-
-object From {
-  implicit def something(companion: From.type): From = companion.apply // can I get this to work???
-
-  def apply(table: DbTable): From = From(table)
-
-  def apply: From = From(None)
-  //  def apply()
+  def empty: From = this.copy(table = EmptyTable) // is this bad?
 }

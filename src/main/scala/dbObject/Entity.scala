@@ -43,6 +43,12 @@ trait Table extends Entity {
   def isEmpty: Boolean // todo can probably drop this
 }
 
+case object EmptyTable extends Table {
+  def write = ""
+
+  override def isEmpty: Boolean = true
+}
+
 case class DbTable(schema: Schema, tableName: String) extends Table {
   override def name: SqlObject = sqlObject(tableName)
 
