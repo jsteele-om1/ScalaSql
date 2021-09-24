@@ -17,22 +17,6 @@ object Runner extends App {
   val selectColumns = Seq(coalescePatientId, encounterId)
 
 
-  //  val select = Select(selectColumns)
-  //  val from = From(patientTable)
-  //  val join = InnerJoin(patientId, encounterTable, patientId)
-  //
-  //  val sql =
-  //    s"""
-  //      |$select
-  //      |$from
-  //      |$join
-  //      |""".stripMargin
-
-  //  val sql = QueryBuilder(patientId, patientTable)
-  //    .withSelectColumn(encounterPatientId)
-  //    .withJoin(InnerJoin(patientId, encounterTable, encounterPatientId))
-  //    .build
-
   val query = Query.builder
     .withSelectColumn(patientId)
     .withFrom(patientTable)

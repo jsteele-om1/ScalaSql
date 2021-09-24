@@ -44,7 +44,7 @@ object Query {
   def builder: QueryBuilder = QueryBuilder() // why do I need to call apply here?
 }
 
-case class QueryBuilder(private val wip: Query = Query(Seq.empty, null, Seq.empty, null)) { // table needs to be optional
+case class QueryBuilder(private val wip: Query = Query(Seq.empty, None, Seq.empty, None)) { // table needs to be optional
   def withSelectColumn(newColumn: Field): QueryBuilder = {
     this.copy(wip = this.wip.copy(columns = this.wip.columns ++ Seq(newColumn)))
   }
