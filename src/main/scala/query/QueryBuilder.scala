@@ -3,19 +3,19 @@ package query
 import dbObject.{Column, Database, DbTable, Field, SqlObject, Table, Transformation}
 import queryObject.{Expressions, From, Join, Select, Where}
 
-class Query(columns: Seq[Field],
+case class Query(columns: Seq[Field],
             table: Table,
             joins: Seq[Join],
-            where: Where) extends Table {
+            where: Where) extends Table { // should be optional
 
   override def isEmpty: Boolean = this.write == Query.builder.build.write
 
-  private def unpackTable(table: Table) = {
-    table match {
-      case dbTable: DbTable => dbTable
-      case query: Query => s"(${query.write})"
-    }
-  }
+//  private def unpackTable(table: Table) = { // can't implement yet
+//    table match {
+//      case dbTable: DbTable => dbTable
+//      case query: Query => s"(${query.write})"
+//    }
+//  }
 
   private def isValid = table.isEmpty && columns.nonEmpty
 
@@ -38,32 +38,52 @@ class Query(columns: Seq[Field],
   override def name: SqlObject = sqlObject(this.toString)
 }
 
+case class QueryBuilder(private val wip: Query = Query(Seq.empty, null, Seq.empty, null)) { // table needs to be optional
+  def withSelectColumn(newColumn: Field): QueryBuilder = {
+//    this.copy(columns ++ Seq(newColumn))
+    this.copy(wip = this.wip.copy(columns = this.wip.columns ++ Seq(newColumn)))
+  }
+
+  def build: Query = {
+    require(wip.columns.nonEmpty)
+    require(wip.table != null)
+    // check columns are from tables in from or joins
+    wip
+  }
+} // communicating to devs more clearly the reason for the wip, it's not
+
+object testObj {
+  val q: QueryBuilder = QueryBuilder(Query(Seq.empty, null, Seq.empty, null))
+}
+
 object Query {
   def builder: QueryBuilder = QueryBuilder.apply // why do I need to call apply here?
 }
 
-case class QueryBuilder(columns: Seq[Field],
+case class QueryBuilder2(columns: Seq[Field],
                         maybeTable: Option[DbTable],
                         joins: Seq[Join],
                         where: Where) { // todo change overall where to seq of filters
 
   val table = maybeTable match {
-    case None => DbTable("", "", "")
+    case None => DbTable("", "", "") // antipattern - data model has to support not populating it
     case Some(table: DbTable) => table
     case _ => throw new Exception("UH OH")
   }
 
-  def withSelectColumn(newColumn: Field): QueryBuilder = this.copy(columns ++ Seq(newColumn))
+  def withSelectColumn(newColumn: Field): QueryBuilder2 = this.copy(columns ++ Seq(newColumn))
 
-  def withSelectColumns(newColumns: Seq[Field]): QueryBuilder = this.copy(columns ++ newColumns)
+  def withSelectColumns(newColumns: Seq[Field]): QueryBuilder2 = this.copy(columns ++ newColumns)
 
-  def withFrom(table: DbTable): QueryBuilder = this.copy(maybeTable = Some(table))
+  def withFrom(table: DbTable): QueryBuilder2 = this.copy(maybeTable = Some(table))
 
-  def withJoin(newJoin: Join): QueryBuilder = this.copy(joins = joins ++ Seq(newJoin))
+  def withJoin(newJoin: Join): QueryBuilder2 = this.copy(joins = joins ++ Seq(newJoin))
 
-  def withJoins(newJoins: Seq[Join]): QueryBuilder = this.copy(joins = joins ++ newJoins)
+  def withJoins(newJoins: Seq[Join]): QueryBuilder2 = this.copy(joins = joins ++ newJoins)
 
   def build: Query = new Query(columns, table, joins, where)
+
+
 
 }
 

@@ -38,9 +38,9 @@ object Schema {
 }
 
 trait Table extends Entity {
-  def write: String
+  def write: String // todo can drop this
 
-  def isEmpty: Boolean
+  def isEmpty: Boolean // todo can probably drop this
 }
 
 case class DbTable(schema: Schema, tableName: String) extends Table {
