@@ -23,14 +23,10 @@ object Runner extends App {
     .build
 
   println(query.write)
-  //
-  //  val t = Seq(
-  //    Seq("a"),
-  //    Seq("b")
-  //  )
-  //
-  //  val z = t.flatMap(i => i)
-  //  println(z)
 
+  val brokenQuery = Query.builder
+    .withFrom(patientTable)
+    .build
 
+  println(brokenQuery)
 }

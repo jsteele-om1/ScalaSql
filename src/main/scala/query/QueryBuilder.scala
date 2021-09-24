@@ -67,8 +67,8 @@ case class QueryBuilder(private val wip: Query = Query(Seq.empty, None, Seq.empt
   }
 
   def build: Query = {
-    require(wip.columns.nonEmpty)
-    require(wip.table != null)
+    require(wip.columns.nonEmpty, s"Query requires at least 1 column in select")
+    require(wip.table != None, s"Query Type requires a valid table in from clause")
     // check columns are from tables in from or joins
     wip
   }
