@@ -1,38 +1,38 @@
 package query
 
 import dbObject.{Column, Database, DbTable, EmptyTable, Field, SqlObject, Table, Transformation}
-import queryObject.{Expressions, From, Join, Select, Where}
+import queryObject.{Expression, Expressions, From, Join, Select, Where}
 
 case class Query(columns: Seq[Field],
-            table: Option[Table],
-            joins: Seq[Join],
-            where: Option[Where]) extends Table { // should be optional
+                 table: Option[Table],
+                 joins: Seq[Join],
+                 where: Seq[Expression],
+                 groupBy: Seq[Field],
+                 orderBy: Seq[Field]) extends Table {
 
   override def isEmpty: Boolean = this.write == Query.builder.build.write
 
-//  private def unpackTable(table: Table) = { // can't implement yet
-//    table match {
-//      case dbTable: DbTable => dbTable
-//      case query: Query => s"(${query.write})"
-//    }
-//  }
-
-  val unpackTable = table match {
+  private val unpackTable = table match {
     case Some(t: Table) => t
     case None => EmptyTable // different pattern here based on how I do the from?
   }
 
-//  private def isValid = unpackTable == EmptyTable && columns.nonEmpty
+  //  private def isValid = unpackTable == EmptyTable && columns.nonEmpty
 
   private val select = Select(columns)
   private val from = From(unpackTable)
+  private val whereClause = Where(where)
+  private val groupByClause = s"GROUP BY \n\t${groupBy.mkString(",\n\t")}"
+  private val orderByClause = s"ORDER BY \n\t${orderBy.mkString(",\n\t")}"
 
   def write: String =
     s"""
        |$select
        |$from
        |${joins.mkString("\n")}
-       |$where
+       |$whereClause
+       |$groupBy
+       |$orderByClause
        |""".stripMargin
 
   override def toString: String = this.write
@@ -44,7 +44,7 @@ object Query {
   def builder: QueryBuilder = QueryBuilder() // why do I need to call apply here?
 }
 
-case class QueryBuilder(private val wip: Query = Query(Seq.empty, None, Seq.empty, None)) { // table needs to be optional
+case class QueryBuilder(private val wip: Query = Query(Seq.empty, None, Seq.empty, Seq.empty, Seq.empty, Seq.empty)) { // table needs to be optional
   def withSelectColumn(newColumn: Field): QueryBuilder = {
     this.copy(wip = this.wip.copy(columns = this.wip.columns ++ Seq(newColumn)))
   }
@@ -64,6 +64,22 @@ case class QueryBuilder(private val wip: Query = Query(Seq.empty, None, Seq.empt
 
   def withJoins(newJoins: Seq[Join]): QueryBuilder = {
     this.copy(wip = this.wip.copy(joins = this.wip.joins ++ newJoins))
+  }
+
+  def withCondition(newCondition: Expression): QueryBuilder = {
+    this.copy(wip = this.wip.copy(where = this.wip.where ++ Seq(newCondition)))
+  }
+
+  def withGroupByColumns(columns: Seq[Field]): QueryBuilder = {
+    this.copy(wip = this.wip.copy(groupBy = columns))
+  }
+
+  def withOrderByCol(newColumn: Field): QueryBuilder = {
+    this.copy(wip = this.wip.copy(orderBy = this.wip.orderBy ++ Seq(newColumn)))
+  }
+
+  def withOrderByCols(newColumns: Seq[Field]): QueryBuilder = {
+    this.copy(wip = this.wip.copy(orderBy = this.wip.orderBy ++ newColumns))
   }
 
   def build: Query = {

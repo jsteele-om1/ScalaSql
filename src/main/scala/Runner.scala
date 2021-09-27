@@ -1,6 +1,6 @@
-import dbObject.{Coalesce, Column, Database, Schema, SqlObject, DbTable}
+import dbObject.{Coalesce, Column, Database, DbTable, RowNumber, Schema, SqlObject, Window}
 import query.{Query, QueryBuilder}
-import queryObject.{From, InnerJoin, Select}
+import queryObject.{Expressions, From, InnerJoin, Select}
 
 object Runner extends App {
 
@@ -16,17 +16,22 @@ object Runner extends App {
   val coalescePatientId = Coalesce(Seq(patientId, encounterPatientId))
   val selectColumns = Seq(coalescePatientId, encounterId)
 
+  val partition = Window(selectColumns, Seq(patientId), RowNumber)
+
 
   val query = Query.builder
     .withSelectColumn(patientId)
+    .withSelectColumn(partition)
     .withFrom(patientTable)
+    .withCondition(Expressions.isIn(patientId, "VARCHAR", Seq("1", "4", "98")))
+    .withOrderByCol(patientId)
     .build
 
   println(query.write)
 
-  val brokenQuery = Query.builder
-    .withFrom(patientTable)
-    .build
+//  val brokenQuery = Query.builder
+//    .withFrom(patientTable)
+//    .build
 
-  println(brokenQuery)
+//  println(brokenQuery)
 }

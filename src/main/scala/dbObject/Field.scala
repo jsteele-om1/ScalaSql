@@ -37,6 +37,38 @@ case class Lower(field: Field) extends Transformation {
   override def transform: String = s"LOWER($field)"
 }
 
+trait AggregateTransformation extends Transformation
+
+case class Max(field: Field) extends  AggregateTransformation {
+  override def relevantTables: Seq[Field] = Seq.empty
+
+  override def transform: String = s"MAX($field)"
+}
+
+trait RankFunction {
+  def functionName: String
+}
+
+case object RowNumber extends RankFunction {
+  override def functionName: String = "ROW_NUMBER"
+}
+
+case object Rank extends RankFunction {
+  override def functionName: String = "RANK"
+}
+
+case class Window(partitionByCols: Seq[Field], orderByCols: Seq[Field], rankFunction: RankFunction) extends Transformation {
+  override def transform: String = {
+    s"""
+       |${rankFunction.functionName} OVER (
+       |  PARTITION BY ${partitionByCols.mkString(", ")}
+       |  ORDER BY ${orderByCols.mkString(", ")} AS rn
+       |""".stripMargin
+  }
+
+  override def relevantTables: Seq[Field] = Seq.empty
+}
+
 case class Custom(customSql: String, includedFields: Option[Seq[Field]] = None) extends Transformation {
   override def relevantTables: Seq[Field] = includedFields match {
     case None => Seq.empty

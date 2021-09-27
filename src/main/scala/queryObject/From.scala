@@ -13,4 +13,4 @@ case class From(table: Table) {
     case _ => "" // todo need to change this to an Either probably
   }
   def empty: From = this.copy(table = EmptyTable) // is this bad?
-}
+} //20govols20
