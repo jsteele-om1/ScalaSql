@@ -21,6 +21,7 @@ case class Query(columns: Seq[Field],
 
   private val select = Select(columns)
   private val from = From(unpackTable)
+  private val joinClause = {joins.mkString("\n")}
   private val whereClause = Where(where)
   private val groupByClause = s"GROUP BY \n\t${groupBy.mkString(",\n\t")}"
   private val orderByClause = s"ORDER BY \n\t${orderBy.mkString(",\n\t")}"
@@ -29,9 +30,9 @@ case class Query(columns: Seq[Field],
     s"""
        |$select
        |$from
-       |${joins.mkString("\n")}
+       |$joinClause
        |$whereClause
-       |$groupBy
+       |$groupByClause
        |$orderByClause
        |""".stripMargin
 
@@ -70,6 +71,8 @@ case class QueryBuilder(private val wip: Query = Query(Seq.empty, None, Seq.empt
     this.copy(wip = this.wip.copy(where = this.wip.where ++ Seq(newCondition)))
   }
 
+  // this is a full replace for the group by columns because building that clause up over time could
+  // potentially cause issues
   def withGroupByColumns(columns: Seq[Field]): QueryBuilder = {
     this.copy(wip = this.wip.copy(groupBy = columns))
   }

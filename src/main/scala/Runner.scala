@@ -1,4 +1,4 @@
-import dbObject.{Coalesce, Column, Database, DbTable, RowNumber, Schema, SqlObject, Window}
+import dbObject.{Coalesce, Column, Database, DbTable, Max, RowNumber, Schema, SqlObject, Window}
 import query.{Query, QueryBuilder}
 import queryObject.{Expressions, From, InnerJoin, Select}
 
@@ -11,6 +11,7 @@ object Runner extends App {
 
   val patientId = Column(patientTable, "patient_id")
   val encounterId = Column(encounterTable, "encounter_id")
+  val maxEncounterId = Max(encounterId)
   val encounterPatientId = Column(encounterTable, "patient_id")
 
   val coalescePatientId = Coalesce(Seq(patientId, encounterPatientId))
@@ -21,10 +22,12 @@ object Runner extends App {
 
   val query = Query.builder
     .withSelectColumn(patientId)
+    .withSelectColumn(maxEncounterId)
     .withSelectColumn(partition)
     .withFrom(patientTable)
     .withCondition(Expressions.isIn(patientId, "VARCHAR", Seq("1", "4", "98")))
     .withOrderByCol(patientId)
+    .withGroupByColumns(Seq(patientId))
     .build
 
   println(query.write)
