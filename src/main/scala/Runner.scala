@@ -17,23 +17,23 @@ object Runner extends App {
   val coalescePatientId = Coalesce(Seq(patientId, encounterPatientId))
   val selectColumns = Seq(coalescePatientId, encounterId)
 
-  val partition = Window(selectColumns, Seq(patientId), RowNumber)
+  val partition = Window(selectColumns, Seq(patientId), RowNumber) //
 
+ // varArgs
 
-  val query = Query.builder
-    .withSelectColumn(patientId)
-    .withSelectColumn(maxEncounterId)
-    .withSelectColumn(partition)
+  val query: Query = Query.builder
     .withFrom(patientTable)
     .withCondition(Expressions.isIn(patientId, "VARCHAR", Seq("1", "4", "98")))
     .withOrderByCol(patientId)
     .withGroupByColumns(Seq(patientId))
+    .withSelectColumns(Seq(patientId, maxEncounterId, partition))
     .build
 
   println(query.write)
 
 //  val brokenQuery = Query.builder
 //    .withFrom(patientTable)
+////    .withSelectColumn(patientId)
 //    .build
 
 //  println(brokenQuery)

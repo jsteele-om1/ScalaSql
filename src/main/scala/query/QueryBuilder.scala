@@ -1,6 +1,6 @@
 package query
 
-import dbObject.{Column, Database, DbTable, EmptyTable, Field, SqlObject, Table, Transformation}
+import dbObject.{AggregateTransformation, Column, Database, DbTable, EmptyTable, Field, SqlObject, Table, Transformation}
 import queryObject.{Expression, Expressions, From, Join, Select, Where}
 
 case class Query(columns: Seq[Field],
@@ -10,11 +10,9 @@ case class Query(columns: Seq[Field],
                  groupBy: Seq[Field],
                  orderBy: Seq[Field]) extends Table {
 
-  override def isEmpty: Boolean = this.write == Query.builder.build.write
-
   private val unpackTable = table match {
     case Some(t: Table) => t
-    case None => EmptyTable // different pattern here based on how I do the from?
+    case None => EmptyTable
   }
 
   //  private def isValid = unpackTable == EmptyTable && columns.nonEmpty
@@ -23,8 +21,14 @@ case class Query(columns: Seq[Field],
   private val from = From(unpackTable)
   private val joinClause = {joins.mkString("\n")}
   private val whereClause = Where(where)
-  private val groupByClause = s"GROUP BY \n\t${groupBy.mkString(",\n\t")}"
-  private val orderByClause = s"ORDER BY \n\t${orderBy.mkString(",\n\t")}"
+  private val groupByClause = groupBy match {
+    case Seq() => ""
+    case _ => s"GROUP BY \n\t${groupBy.mkString(",\n\t")}"
+  }
+  private val orderByClause = orderBy match {
+    case Seq() => ""
+    case _ => s"ORDER BY \n\t${orderBy.mkString(",\n\t")}"
+  }
 
   def write: String =
     s"""
@@ -45,7 +49,7 @@ object Query {
   def builder: QueryBuilder = QueryBuilder() // why do I need to call apply here?
 }
 
-case class QueryBuilder(private val wip: Query = Query(Seq.empty, None, Seq.empty, Seq.empty, Seq.empty, Seq.empty)) { // table needs to be optional
+case class QueryBuilder(private val wip: Query = Query(Seq.empty, None, Seq.empty, Seq.empty, Seq.empty, Seq.empty)) {
   def withSelectColumn(newColumn: Field): QueryBuilder = {
     this.copy(wip = this.wip.copy(columns = this.wip.columns ++ Seq(newColumn)))
   }
@@ -71,8 +75,6 @@ case class QueryBuilder(private val wip: Query = Query(Seq.empty, None, Seq.empt
     this.copy(wip = this.wip.copy(where = this.wip.where ++ Seq(newCondition)))
   }
 
-  // this is a full replace for the group by columns because building that clause up over time could
-  // potentially cause issues
   def withGroupByColumns(columns: Seq[Field]): QueryBuilder = {
     this.copy(wip = this.wip.copy(groupBy = columns))
   }
@@ -85,10 +87,13 @@ case class QueryBuilder(private val wip: Query = Query(Seq.empty, None, Seq.empt
     this.copy(wip = this.wip.copy(orderBy = this.wip.orderBy ++ newColumns))
   }
 
-  def build: Query = {
+  private def validateWip(): Unit = {
     require(wip.columns.nonEmpty, s"Query requires at least 1 column in select")
-    require(wip.table != None, s"Query Type requires a valid table in from clause")
-    // check columns are from tables in from or joins
+    require(wip.table.isDefined, s"Query Type requires a valid table in from clause")
+  }
+
+  def build: Query = {
+    validateWip()
     wip
   }
-} // communicating to devs more clearly the reason for the wip, it's not
+}

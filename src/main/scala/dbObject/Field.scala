@@ -62,7 +62,8 @@ case class Window(partitionByCols: Seq[Field], orderByCols: Seq[Field], rankFunc
     s"""
        |${rankFunction.functionName} OVER (
        |  PARTITION BY ${partitionByCols.mkString(", ")}
-       |  ORDER BY ${orderByCols.mkString(", ")} AS rn
+       |  ORDER BY ${orderByCols.mkString(", ")}
+       |)  AS rn
        |""".stripMargin
   }
 

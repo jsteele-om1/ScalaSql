@@ -2,9 +2,14 @@ package queryObject
 
 import dbObject.Field
 
-case class Where(conditions: Seq[Expression]) {
+case class Where(conditions: Seq[Expression]) { // should probably just write it yourself
   private val conditionsString = conditions.mkString(("\nAND\n"))
-  override def toString: String = s"WHERE \n\t$conditionsString"
+
+  private val whereClause = conditions match {
+    case Seq() => ""
+    case _ => s"WHERE \n\t$conditionsString"
+  }
+  override def toString: String = whereClause
   //  def empty = ""
 }
 
