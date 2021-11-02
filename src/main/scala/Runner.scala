@@ -19,22 +19,20 @@ object Runner extends App {
 
   val partition = Window(selectColumns, Seq(patientId), RowNumber) //
 
- // varArgs
-
   val query: Query = Query.builder
+    .withSelectColumns(Seq(patientId, maxEncounterId))
     .withFrom(patientTable)
     .withCondition(Expressions.isIn(patientId, "VARCHAR", Seq("1", "4", "98")))
     .withOrderByCol(patientId)
     .withGroupByColumns(Seq(patientId))
-    .withSelectColumns(Seq(patientId, maxEncounterId, partition))
     .build
 
   println(query.write)
 
 //  val brokenQuery = Query.builder
 //    .withFrom(patientTable)
-////    .withSelectColumn(patientId)
+//    .withSelectColumn(patientId)
 //    .build
-
+//
 //  println(brokenQuery)
 }

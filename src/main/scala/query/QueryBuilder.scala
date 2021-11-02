@@ -25,6 +25,7 @@ case class Query(columns: Seq[Field],
     case Seq() => ""
     case _ => s"GROUP BY \n\t${groupBy.mkString(",\n\t")}"
   }
+
   private val orderByClause = orderBy match {
     case Seq() => ""
     case _ => s"ORDER BY \n\t${orderBy.mkString(",\n\t")}"
@@ -46,12 +47,12 @@ case class Query(columns: Seq[Field],
 }
 
 object Query {
-  def builder: QueryBuilder = QueryBuilder() // why do I need to call apply here?
+  def builder: QueryBuilder = QueryBuilder()
 }
 
 case class QueryBuilder(private val wip: Query = Query(Seq.empty, None, Seq.empty, Seq.empty, Seq.empty, Seq.empty)) {
   def withSelectColumn(newColumn: Field): QueryBuilder = {
-    this.copy(wip = this.wip.copy(columns = this.wip.columns ++ Seq(newColumn)))
+    this.copy(wip = this.wip.copy(columns = this.wip.columns ++ Seq(newColumn))) // QueryBuilder(wip = Query(Seq(newColumn), None, Seq.empty, Seq.empty, Seq.empty, Seq.empty))
   }
 
   def withSelectColumns(newColumns: Seq[Field]): QueryBuilder = {
